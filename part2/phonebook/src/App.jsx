@@ -5,12 +5,15 @@ import personService from './services/person'
 
 function App() {
   const [persons, setPersons] = useState([
-    // { name: 'Arto Hellas', number: '00000000', id: 1 },
+    
   ]);
 
   const [newName, setNewName] = useState('');
   const [newNum, setNewNum] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+
+  const [correctMessage,setCorrectMessage]=useState(null)
+  const [errorMessage,setErrorMessage]=useState(null)
 
   const handleNameInput = (e) => {
     setNewName(e.target.value);
@@ -48,7 +51,11 @@ function App() {
       // Perform the update on the server using the HTTP PUT method
       personService.updates(existingPerson.id, { number: newNum })
         .then((response) => {
-          console.log(`Phone number updated for ${newName}`);
+
+          setCorrectMessage(`Phone number updated for ${newName}`);
+          setTimeout(()=>{
+            setCorrectMessage(null)
+          },5000)
         })
         .catch((error) => {
           console.error('Error updating phone number:', error);
@@ -64,6 +71,10 @@ function App() {
 
     personService.create(nameObject)
       .then(response => {
+        setCorrectMessage(`${response.data.name}  added`)
+        setTimeout(() => {
+          setCorrectMessage(null)
+        }, 5000)
         setPersons(persons.concat(response.data));
         setNewName('');
         setNewNum('');
@@ -100,11 +111,15 @@ function App() {
 
       if(userConfirmed){
           personService.deletee(id).then(response=>{
-    
+    setErrorMessage(` Deleted from the server`)
+      setTimeout(() => {
+          setErrorMessage(null)
+        }, 5000)
       getPersonService()
      
      
     }).catch((err)=>{
+      
       alert("ERROR",err)
       
     })
@@ -118,6 +133,9 @@ function App() {
   return (
     <div>
       <h1>PHONEBOOK</h1>
+      <Notification message={correctMessage} type="correct"/>
+       <Notification message={errorMessage} type="error"/>
+      
       <div>
         Filter shown with: <input onChange={handleSearchTerm} value={searchTerm} />
       </div>
@@ -145,6 +163,19 @@ function App() {
       </ul>
     </div>
   );
+}
+
+const Notification=({message,type})=>{
+  if(!message ){
+    return null;
+  }
+  return (
+    <>
+     <div className={type}>{message}</div>
+    
+    </>
+   
+  )
 }
 
 export default App;
